@@ -8,7 +8,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="icon.png">
 
@@ -34,6 +33,137 @@
         #äm-workspace:empty::before { content: "begin..."; color: #f5f5f5; }
         footer { padding: 15px; text-align: center; font-size: 0.55rem; letter-spacing: 3px; color: #eeeeee; text-transform: lowercase; font-family: 'Playfair Display', serif; font-style: italic; }
     </style>
+</head>
+<body>
+
+<header>
+    <h1>äm</h1>
+    <div class="stats"><span id="wordCount">0</span> words</div>
+</header>
+
+<div class="controls">
+    <button class="action" onclick="document.getElementById('fileInput').click()">import</button>
+    <button id="chaosBtn" class="action" onclick="toggleChaos()">chaos: off</button>
+    <button class="action" onclick="exportDoc()">save as</button>
+    <button class="action" style="opacity: 0.3;" onclick="clearCanvas()">clear</button>
+</div>
+
+<div class="style-bar">
+    <button id="boldBtn" class="action bold-btn" onclick="applyStyle('bold')">B</button>
+    <button id="italicBtn" class="action italic-btn" onclick="applyStyle('italic')">I</button>
+    <button id="cursiveBtn" class="action cursive-btn" onclick="applyCursive()">c</button>
+</div>
+
+<input type="file" id="fileInput" accept=".txt" onchange="importDoc(event)">
+<div id="äm-workspace" contenteditable="true" spellcheck="false" inputmode="text"></div>
+<footer>c'est solo de mi</footer>
+
+<script>
+    const canvas = document.getElementById('äm-workspace');
+    const wordCountDisplay = document.getElementById('wordCount');
+    let isChaos = false;
+    let isCursive = false;
+
+    // --- PWA SERVICE WORKER REGISTRATION ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker Registered!', reg))
+                .catch(err => console.log('Service Worker Failed!', err));
+        });
+    }
+
+    window.onload = () => {
+        canvas.innerHTML = localStorage.getItem('am_editor_content') || "";
+        updateStats();
+    };
+
+    function toggleChaos() {
+        isChaos = !isChaos;
+        const btn = document.getElementById('chaosBtn');
+        btn.innerText = `chaos: ${isChaos ? 'on' : 'off'}`;
+        btn.classList.toggle('active');
+        if (!isChaos) document.execCommand('foreColor', false, '#222222');
+        canvas.focus();
+    }
+
+    function applyStyle(cmd) {
+        document.execCommand(cmd, false, null);
+        updateUI();
+        canvas.focus();
+    }
+
+    function applyCursive() {
+        isCursive = !isCursive;
+        const fontName = isCursive ? 'Dancing Script' : 'Montserrat';
+        document.execCommand('fontName', false, fontName);
+        document.getElementById('cursiveBtn').classList.toggle('active');
+        canvas.focus();
+    }
+
+    function getRandomColor() {
+        const hue = Math.floor(Math.random() * 360);
+        return `hsl(${hue}, 95%, 45%)`;
+    }
+
+    canvas.addEventListener('input', (e) => {
+        updateStats();
+        if (isChaos && (e.inputType === "insertText" || e.inputType === "insertCompositionText")) {
+            document.execCommand('foreColor', false, getRandomColor());
+        }
+        localStorage.setItem('am_editor_content', canvas.innerHTML);
+    });
+
+    canvas.addEventListener('click', updateUI);
+    canvas.addEventListener('keyup', updateUI);
+
+    function updateUI() {
+        document.getElementById('boldBtn').classList.toggle('active', document.queryCommandState('bold'));
+        document.getElementById('italicBtn').classList.toggle('active', document.queryCommandState('italic'));
+    }
+
+    function updateStats() {
+        const text = canvas.innerText.trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        wordCountDisplay.innerText = words;
+    }
+
+    function importDoc(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            canvas.innerText = e.target.result;
+            updateStats();
+            localStorage.setItem('am_editor_content', canvas.innerHTML);
+        };
+        reader.readAsText(file);
+    }
+
+    function exportDoc() {
+        const content = canvas.innerText;
+        const filename = prompt("export as:", "my_notes.txt");
+        if (!filename) return;
+        const blob = new Blob([content], {type: "text/plain"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename.endsWith('.txt') ? filename : filename + '.txt';
+        link.click();
+    }
+
+    function clearCanvas() { 
+        if (confirm("clear everything?")) {
+            canvas.innerHTML = ""; 
+            updateStats();
+            localStorage.removeItem('am_editor_content');
+            isCursive = false;
+            document.querySelectorAll('.action').forEach(b => b.classList.remove('active'));
+            document.execCommand('foreColor', false, '#222222');
+        }
+    }
+</script>
+</body>
+</html>
 </head>
 <body>
 
