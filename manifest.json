@@ -1,7 +1,7 @@
 {
-  "name": "äm: text editor",
-  "short_name": "äm",
-  "start_url": ".",
+  "name": "äscribe",
+  "short_name": "äscribe",
+  "start_url": "/ascribe/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
