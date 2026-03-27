@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>äm: text editor</title>
+    <title>äscribe</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
@@ -17,7 +17,9 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: var(--bg); color: var(--accent); font-family: 'Montserrat', sans-serif; }
         body { display: flex; flex-direction: column; }
+        
         header { padding: 35px 20px 5px 20px; text-align: center; flex-shrink: 0; }
+        /* The Signature Header */
         h1 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 1.1rem; letter-spacing: 5px; margin: 0; text-transform: lowercase; opacity: 0.8; }
         
         .stats { font-size: 0.6rem; letter-spacing: 2px; color: var(--text-dim); text-transform: lowercase; margin-top: 8px; }
@@ -25,7 +27,6 @@
         .style-bar { display: flex; justify-content: center; gap: 35px; padding: 12px; border-top: 1px solid #fcfcfc; }
         .action { background: none; border: none; font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.8rem; color: var(--text-dim); cursor: pointer; text-transform: lowercase; }
 
-        /* Font size reduced to 18px and color set to #000000 */
         #äm-workspace { flex-grow: 1; width: 100%; max-width: 700px; margin: 0 auto; padding: 20px; outline: none; font-size: 18px; line-height: var(--line-height); overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; padding-bottom: 60vh; color: #000000; }
         #äm-workspace:empty::before { content: "begin..."; color: #f5f5f5; }
 
@@ -78,7 +79,7 @@
     window.onload = () => {
         canvas.innerHTML = localStorage.getItem('am_current_draft') || "";
         updateStats();
-        // Ensure default ink is black on load
+        // Set ink to black on load
         document.execCommand('foreColor', false, '#000000');
     };
 
@@ -120,8 +121,8 @@
         const btn = document.getElementById('chaosBtn');
         btn.innerText = `chaos: ${isChaos ? 'on' : 'off'}`;
         
-        // Force pure black when turned off
         if (!isChaos) {
+            // Force the "ink" back to pure black
             document.execCommand('foreColor', false, '#000000');
         }
         canvas.focus();
@@ -162,5 +163,5 @@
     }
 </script>
 </body>
-    </html>
+            </html>
     
